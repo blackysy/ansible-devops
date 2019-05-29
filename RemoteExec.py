@@ -9,10 +9,11 @@ import sys
 import paramiko
 
 
+# 连接构建服务器
 def ssh_connect():
     hostname = '172.28.250.2'
     username = 'jenkins'
-    password = '123931'
+    password = 'sand931'
     try:
         ssh_fd = paramiko.SSHClient()
         ssh_fd.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -23,18 +24,21 @@ def ssh_connect():
         exit()
 
 
+# 远程执行命令方法
 def ssh_exec_cmd(ssh_fd, cmd):
     return ssh_fd.exec_command(cmd)
 
 
+# 关闭ssh连接
 def ssh_close(ssh_fd):
     ssh_fd.close()
 
 
-def app_start(ip, user, app_type):
+# 启动应用
+def app_start(ip, user, app_type, exec_cmd):
     if app_type == 'jdk':
-        cmd = "ansible %s -u %s -m shell -a 'source ~/.bash_profile && cd $BIN_HOME && sh start.sh'" \
-              % (ip, user)
+        cmd = "ansible %s -u %s -m shell -a 'source ~/.bash_profile && cd $BIN_HOME && sh %s'" \
+              % (ip, user, exec_cmd)
     elif app_type == 'tomcat':
         cmd = "ansible %s -u %s -m shell -a 'source ~/.bash_profile && cd $BIN_HOME/.. && nohup ./bin/startup.sh'" \
               % (ip, user)
@@ -51,12 +55,13 @@ def app_start(ip, user, app_type):
     else:
         print('Start success.')
 
-    # for item in stdout.readlines():
-    #    print item
+    for item in stdout.readlines():
+        print item
 
     ssh_close(sshd)
 
 
+# 停止应用
 def app_stop(ip, user):
     cmd = """ansible %s -u %s -m shell -a 'ps x|grep java|grep -v grep|cut -d " " -f 1|xargs kill -9'""" \
           % (ip, user)
@@ -70,11 +75,17 @@ def app_stop(ip, user):
     else:
         print('Stop success.')
 
-    # for item in stdout.readlines():
-    #    print item
+    for item in stdout.readlines():
+        print item
 
     ssh_close(sshd)
 
 
-app_start(ip='172.28.250.103', user='smp_client_str', app_type='tomcat')
-#app_stop(ip='172.28.250.103', user='smp_client_str')
+# 测试1 netty或者spring非tomcat的应用启动方法
+# app_start(ip='172.28.250.103', user='smp_pay_str', app_type='jdk', exec_cmd='start.sh 172.28.250.242 172.28.250.142')
+
+# 测试2 tomcat的应用启动方法
+# app_start(ip='172.28.250.103', user='smp_client_str', app_type='tomcat', exec_cmd='')
+
+# 测试3 停止应用的方法
+# app_stop(ip='172.28.250.103', user='smp_client_str')
