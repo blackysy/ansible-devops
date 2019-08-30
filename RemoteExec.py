@@ -63,7 +63,7 @@ def app_start(ip, user, app_type, exec_cmd):
 
 # 停止应用
 def app_stop(ip, user):
-    cmd = """ansible %s -u %s -m shell -a 'ps x|grep java|grep -v grep|cut -d " " -f 1|xargs kill -9'""" \
+    cmd = """ansible %s -u %s -m shell -a 'ps x|grep java|grep -v grep|sed -e "s/^[ \t]*//g"|cut -d " " -f 1|xargs kill -9'""" \
           % (ip, user)
     sshd = ssh_connect()
     stdin, stdout, stderr = ssh_exec_cmd(sshd, cmd)
